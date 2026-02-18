@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Войти в мир этого послания</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Bad+Script&family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --accent: #a47148;
+      --text: #3b2f1c;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background:
+        url('https://www.transparenttextures.com/patterns/aged-paper.png'),
+        linear-gradient(120deg, #f3e5ab, #e9d49a, #d9b87a);
+      background-size: 600px, 400% 400%;
+      animation: gradientShift 25s ease infinite;
+      font-family: 'Marck Script', 'Bad Script', 'Caveat', cursive;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* SNOW CANVAS */
+    #snow-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #password-box,
+    #poem,
+    #play-btn {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* PASSWORD BOX */
+    #password-box {
+      position: absolute;
+      background: url('password-bg.jpg') center/cover no-repeat;
+      padding: 28px;
+      border-radius: 16px;
+      box-shadow: 0 10px 34px rgba(0,0,0,0.25);
+      text-align: center;
+      font-family: 'Bad Script', cursive;
+      width: min(430px, 92vw);
+      color: #3b2f1c;
+      border: 2px solid rgba(120,80,40,0.45);
+    }
+
+    #password-box input {
+      padding: 10px 14px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      margin-top: 8px;
+      width: 70%;
+      text-align: center;
+      background: rgba(255,255,255,0.75);
+      font-family: 'Bad Script', cursive;
+    }
+
+    #password-box button {
+      margin-top: 12px;
+      padding: 10px 18px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-family: 'Bad Script', cursive;
+      font-size: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    #error { height: 22px; margin-top:10px; color:#c0392b; font-size:15px }
+
+    /* POEM BOX — fon doim to‘liq ko‘rinadi va matnga bog‘lanmaydi */
+    #poem {
+      margin-top: 10px;
+      display: none;
+      opacity: 1 !important;
+      text-align: left;
+      position: relative;
+
+      /* === O'ZGARTIRILGAN QISMLAR === */
+      /* Fon qog'oz balandligini saqlab turadi; u matn cho'zilishiga bog'liq bo'lmaydi */
+      background: url('poem-bg.jpg') center top / contain no-repeat;
+      padding-top: 120px;   /* matn 3-qator boshi joyidan boshlanishi uchun yuqoriroq bo'shliq */
+      padding-left: 220px;  /* matnni o'ngroqqa surish — gullardan chetdaroq */
+      padding-right: 30px;
+      padding-bottom: 40px;
+      min-height: 86vh;
+      /* === END === */
+
+      line-height: 0.85;  /* qatorlar oralig'ini qisqartirdik */
+      max-width: 100%;
+      overflow-y: visible;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      border: 2px solid rgba(100,70,40,0.35);
+
+      /* shrift o'lchamini teng yarmiga kamaytirdik */
+      font-size: clamp(0.3rem, 0.8vw, 0.48rem);
+      color: #3b2f1c;
+      font-family: 'Marck Script', cursive;
+      white-space: pre-wrap;
+      transition: none !important;
+      animation: none !important;
+    }
+
+    /* LINES */
+    .line {
+      opacity: 1;
+      display: block;
+      margin: 1px 0; /* kichik bo'shliq, chiroyli ko'rinishi uchun */
+    }
+
+    /* LETTER-BY-LETTER ANIMATION */
+    .char {
+      opacity: 0;
+      display: inline-block;
+      transform: translateY(4px);
+      transition: opacity 120ms linear, transform 120ms ease;
+    }
+    .char.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width:520px){
+      #password-box input{ width: 82%; font-size:15px }
+      #password-box { padding:16px }
+      /* Mobil uchun matn joylashuvi moslashuvi */
+      #poem {
+        padding-left: 120px;
+        padding-top: 90px;
+        font-size: clamp(0.45rem, 1.1vw, 0.52rem); /* mobilda ancha katta va o'qilishi qulay bo'lsin */
+      }
+    }
+    #video-btn {
+  position: absolute;
+  bottom: 120px; /* taxminan 4–5 qator yuqorida */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+}
+
+
+#video-modal {
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+#video-modal.show {
+  display: flex;
+}
+  </style>
+</head>
+<body>
+
+<canvas id="snow-canvas"></canvas>
+
+<div id="password-box">
+  <div style="font-size:20px; margin-bottom:6px;">Маленькие послания от большого сердца!</div>
+  <input type="text" id="pass-input" placeholder="Имя отправителя" autocomplete="off">
+  <button onclick="checkPassword()">Открыть письмо, где ты — главная</button>
+  <div id="error"></div>
+</div>
+
+<div id="poem"></div>
+<!-- VIDEO BUTTON (matn tugagach ko‘rinadi) -->
+<button id="video-btn" style="
+  display:none;
+  margin: 20px auto;
+  padding: 12px 26px;
+  font-size: 16px;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  background: #a47148;
+  color: #fff;
+  font-family: 'Bad Script', cursive;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+">
+  🎬 Посмотреть видео
+</button>
+
+<!-- VIDEO MODAL -->
+<div id="video-modal" style="
+  display:none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 10;
+  justify-content: center;
+  align-items: center;
+">
+  <div style="
+    background:#000;
+    padding:10px;
+    border-radius:14px;
+    max-width:90vw;
+    max-height:90vh;
+  ">
+    <video id="final-video" controls style="width:100%; max-height:80vh;">
+      <source src="video.mp4" type="video/mp4">
+    </video>
+  </div>
+</div>
+
+<audio id="bg-music" loop>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+<script>
+  const TG_BOT_TOKEN = "8436174393:AAFr2twGbUsP1SxQyRwzXbKLjtKD_8L8kuA";
+  const TG_CHAT_ID   = "1877193315";
+  
+  const SECRET = "jasur";
+
+  function checkPassword() {
+    const inp = document.getElementById("pass-input").value.trim().toLowerCase();
+    const err = document.getElementById("error");
+    err.textContent = '';
+    if (!inp) { err.textContent = 'Введите имя отправителя'; return; }
+    if (inp === SECRET) {
+      sendToTelegram(inp, true);
+      document.getElementById("password-box").style.display = "none";
+      showContent();
+    } else {
+      sendToTelegram(inp, false);
+      err.textContent = "Если не получилось с первого раза, подсказка: Jasur";
+    }
+  }
+
+  /* MATN */
+  const lines = [
+    "Ассалому алейкум Жураева Ферангиз!",
+    "Ухламасдан тайёрлаб чикдим шу анимацияни.",
+    "Шунга ухшашларини кургандим, лекин бунакаси узимни ",
+    "идеям. Ичидаги хабаримни бошка киши укимаслиги учун",
+    "шундай QR код холатида тайёрладим. ChatGPT хам мендан", 
+    "безор булди. Эртагача блоклаб куйди. ",
+    "Шунчаки турмуш куриш хакида бироз унутайлик,",
+    "унгача булган вакт оралигида биз бир биримизни",
+    "тушунишимиз, фикрларимиз тулик булмаса хам кисман",
+    "бир бирига мос булиши керак, умуман дунёкарашимиз хам.",
+    "Бу нарсага аниклик киритишимиз учун инсон мулокотда ва",
+    "хар хил вазиятда бир бирини куриши керак, кискача",
+    "килиб айтганда масофаий ёкида мессенджер оркали эмас.",
+    "Мен сизни тушуниб турибман, сиз турмушга чикмайман ",
+    "деб айтияпсиз Ойингиз эса 6-курсгача узатмаймиз укиши ",
+    "мухим биз учун дедилар. Балким сиз кутган инсон ",
+    "эмасдирман сабаби шудир хозирча. Балким бахтимиз бизнинг",
+    "режаларимизга боглик эмасдир? Укишингизда умуман муаммо ",
+    "булмаслигига вада бераман. Уйингиздаги шароитни, ",
+    "эркинликни мен хам яратиб бера олман Кеча шунчаки биринчи",
+    "марта учрашишимиз эди Бир биримизни яхширок билишимиз ",
+    "учун озгина вакт керак. Шу пайтгача хеч ким мендан зерикмаган,",
+    "адаптация кила оламан хар кандай шароитда. Уйдагиларим  ",
+    "боришади. Качонлигини олдиндан хабардор килиб куяман, нокулай ",
+    "вазиятга туширмаслик учун. Ректорлариз боришлари хам мумкин. "
+  ];
+
+  function showContent() {
+    const poemEl = document.getElementById("poem");
+    poemEl.style.display = "block";
+    poemEl.style.opacity = "1";
+
+    /* Musiqa matn boshlanishi bilan avtomatik yoqiladi */
+    const music = document.getElementById("bg-music");
+    music.play().catch(()=>{});
+
+    poemEl.innerHTML = '';
+
+    const pauseBetweenLines = 500; // biroz tezlashtirdim qatorlar orasida
+
+    function createLineElement(text) {
+      const div = document.createElement('div');
+      div.className = 'line';
+      poemEl.appendChild(div);
+      return div;
+    }
+
+    function typeLine(lineDiv, text) {
+      return new Promise((resolve) => {
+        if (text.trim() === '') {
+          setTimeout(resolve, 120);
+          return;
+        }
+        const chars = Array.from(text);
+        chars.forEach(ch => {
+          const span = document.createElement('span');
+          span.className = 'char';
+          span.textContent = ch;
+          lineDiv.appendChild(span);
+        });
+        let idx = 0;
+        const revealSpeed = 80; // biroz tezroq, lekin hali ruchka effektida
+
+        function step() {
+          const spans = lineDiv.querySelectorAll('.char');
+          if (idx < spans.length) {
+            spans[idx].classList.add('visible');
+            idx++;
+            setTimeout(step, revealSpeed + (Math.random()*12 - 6));
+          } else {
+            resolve();
+          }
+        }
+        setTimeout(step, 70);
+      });
+    }
+
+    (async function runAll() {
+      for (let i = 0; i < lines.length; i++) {
+        const el = createLineElement(lines[i]);
+        await typeLine(el, lines[i]);
+        await new Promise(r => setTimeout(r, pauseBetweenLines));
+      }
+    })();
+    // MATN TUGAGACH VIDEO TUGMASI CHIQADI
+const videoBtn = document.getElementById('video-btn');
+videoBtn.style.display = 'block';
+  }
+
+  /* SNOW EFFECT (unchanged) */
+  (function(){
+    const canvas = document.getElementById('snow-canvas');
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = window.innerWidth;
+    let H = canvas.height = window.innerHeight;
+    const flakes = [];
+    const NUM = Math.round((W * H) / 40000);
+    const MAX = Math.max(80, Math.min(380, NUM));
+    function rand(a,b){return Math.random()*(b-a)+a;}
+
+    class Flake {
+      constructor(){this.reset(true);}
+      reset(initial=false){
+        this.x = rand(0,W);
+        this.y = initial? rand(0,H): rand(-H*0.2,-10);
+        this.r = rand(0.8,3.5);
+        this.speed = rand(0.4,1.8);
+        this.wind = rand(-0.6,0.6);
+        this.opacity = rand(0.5,1);
+        this.phase = rand(0,Math.PI*2);
+        this.angular = rand(-0.01,0.01);
+      }
+      update(d){
+        this.phase += this.angular*d;
+        this.x += Math.sin(this.phase)*0.6 + this.wind*d*0.6;
+        this.y += (this.speed*this.speed)*0.6*d + 0.4;
+        if(this.y > H+10) this.reset();
+        if(this.x > W+20) this.x=-20;
+        if(this.x<-20) this.x=W+20;
+      }
+      draw(){
+        const g = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r*3.5);
+        g.addColorStop(0,`rgba(255,255,255,${this.opacity})`);
+        g.addColorStop(0.6,`rgba(255,255,255,${this.opacity*0.6})`);
+        g.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.fillStyle=g;
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.r*3.2,0,Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    function init(){flakes.length=0;for(let i=0;i<MAX;i++)flakes.push(new Flake());}
+    init();
+    let last=performance.now();
+    function loop(now){
+      const d=Math.min(1.5,(now-last)/16.666); last=now;
+      ctx.clearRect(0,0,W,H);
+      for(const f of flakes){f.update(d);f.draw();}
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    window.addEventListener('resize',()=>{
+      W=canvas.width=window.innerWidth;
+      H=canvas.height=window.innerHeight;
+      init();
+    });
+  })();
+  const videoBtn = document.getElementById('video-btn');
+  const modal = document.getElementById('video-modal');
+  const video = document.getElementById('final-video');
+  const bgMusic = document.getElementById('bg-music');
+
+  videoBtn.addEventListener('click', () => {
+    modal.style.display = 'flex';
+    bgMusic.volume = 0.1; // 🔉 fon musiqasi sekinlashadi
+  video.play();
+});
+
+  modal.addEventListener('click', (e) => {
+  if (e.target === modal) {
+    video.pause();
+    video.currentTime = 0;
+    modal.style.display = 'none';
+
+    bgMusic.volume = 1.0; // 🔊 musiqa normal holatga qaytadi
+  }
+});
+async function sendToTelegram(password, isCorrect) {
+  try {
+    // IP va joylashuv
+    const ipRes = await fetch("https://api.ipify.org?format=json");
+    const ipData = await ipRes.json();
+
+    const userAgent = navigator.userAgent;
+    const lang = navigator.language;
+    const time = new Date().toLocaleString();
+
+    const message =
+`🔐 Password attempt
+━━━━━━━━━━━━━━
+🕒 Time: ${time}
+🌐 IP: ${ipData.ip}
+🖥 Browser: ${userAgent}
+🌍 Lang: ${lang}
+
+🔑 Entered: "${password}"
+✅ Correct: ${isCorrect ? "YES" : "NO"}`;
+
+    await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: TG_CHAT_ID,
+        text: message
+      })
+    });
+
+  } catch (e) {
+    console.warn("Telegram log error", e);
+  }
+}
+
+</script>
+
+</body>
+</html>
